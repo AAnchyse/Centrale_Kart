@@ -36,7 +36,7 @@ Les éléments suivants ont été développés:
 		-Tourner (torque)
 		-Dérapage (torque + forward speed)
 		-Suspensions (raycast)
-		-Force empêchant le kart de se retourner ( force at 		position)
+		-Force empêchant le kart de se retourner ( force at position)
 		-Vitesse maximale
 		-Forces frottement
 
