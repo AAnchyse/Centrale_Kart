@@ -9,7 +9,8 @@ Développer un jeu de course multijoueur arcade dans le style de Mario Kart avec
 Jeu de course de voiture multijoueur (local/en ligne).
 Les joueurs peuvent attaquer les adversaires en se servant d'items aléatoires récupérés sur le terrains.
 
-### Liste d'items: -
+**Liste d'items:** 
+
 
 **Physique du kart (sondage):**	
 - type arcade (Alex)
@@ -31,8 +32,8 @@ Les joueurs peuvent attaquer les adversaires en se servant d'items aléatoires r
 
 ## Première version du jeu:
 
-Un premier prototype du jeu a été développé. Il servira de matériau de base au projet.
-[link to Google!](https://www.youtube.com/watch?v=x_MaWFpt2W0)
+Un premier prototype du jeu a été développé. Il pourra servir de matériau de base au projet.
+https://www.youtube.com/watch?v=x_MaWFpt2W0
 
 Les éléments suivants ont été développés:
 
