@@ -45,7 +45,6 @@ public class KartToutTerrain : MonoBehaviour
 
         rb =GetComponent<Rigidbody>();
         rb.centerOfMass = centerOfMassOffset;
-        Debug.Log(rb.centerOfMass);
         normals = new Vector3(0, 0, 0);
         counter = 0;
     }
@@ -118,7 +117,6 @@ public class KartToutTerrain : MonoBehaviour
         }
         if(normalCounter>0)
             normals /= normalCounter;
-        Debug.Log(normals);
 
         if(counter==4)//this is the caca
         {
@@ -189,7 +187,6 @@ public class KartToutTerrain : MonoBehaviour
         {
             rb.velocity = rb.velocity.normalized * maxAngularVelocity;
         }
-        Debug.Log(rb.velocity.magnitude);
     }
 }
 
