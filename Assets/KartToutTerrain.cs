@@ -2,6 +2,7 @@
 
 public class KartToutTerrain : MonoBehaviour
 {
+    #region Constantes
 
     public Rigidbody rb;
     public Vector3 centerOfMassOffset;
@@ -38,7 +39,11 @@ public class KartToutTerrain : MonoBehaviour
     bool accelerateb;
     bool canSkid=true;
 
-    // Use this for initialization
+    #endregion
+
+    /// <summary>
+    /// Use this initialization
+    /// </summary>
     void Start()
     {
         previousLength = restLength;
@@ -48,8 +53,10 @@ public class KartToutTerrain : MonoBehaviour
         normals = new Vector3(0, 0, 0);
         counter = 0;
     }
-
-    // Update is called once per frame
+    
+    /// <summary>
+    /// Update is called once per frame
+    /// </summary>
     void Update()
     {
         skid = 0;
@@ -80,6 +87,9 @@ public class KartToutTerrain : MonoBehaviour
 
     }
 
+    /// <summary>
+    /// FixedUpdate is called regularly
+    /// </summary>
     private void FixedUpdate()
     {
         //suspension Force
