@@ -140,8 +140,6 @@ public class WheelDrive : MonoBehaviour
 		//corriger l'atterrissage (regarder du côté du traction helper)
 		//respawn la voiture quand elle est à l'envers
 		
-
-
 		float angleInput = Input.GetAxis("Horizontal");
 
 		float accInput = Input.GetAxis("Vertical")*(maxSpeed - rb.velocity.magnitude) / maxSpeed;
@@ -211,11 +209,12 @@ public class WheelDrive : MonoBehaviour
 		//en faire une fonction
 		isGrounded = true;
 		changeStiffness = false;
+		float count = 0;
 		foreach (WheelCollider wheel in m_Wheels)
 		{
 			if (!wheel.GetGroundHit(out WheelHit hit))
 			{
-				isGrounded = false;
+				count +=1;
 			}
 			else
 			{
@@ -225,16 +224,18 @@ public class WheelDrive : MonoBehaviour
 				}
 				if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
 				{
-					boostGauge +=Time.deltaTime/2; 
+					boostGauge +=Time.deltaTime/2;
 				}
 			}
 		}
+		if (count==4 )isGrounded = false;
 
 		//Move wheels
 		foreach (WheelCollider wheel in m_Wheels)
 		{
-			if (isGrounded) 
+			if (isGrounded)
 			{
+				rb.constraints = RigidbodyConstraints.None;
 				// Front wheels
 				if (wheel.transform.localPosition.z >= 0)
 				{
@@ -259,7 +260,7 @@ public class WheelDrive : MonoBehaviour
 						}
 						
 						//Steering
-						angle *=3; //à voir si on multplie par un coeff ou autre
+						angle *=2; //à voir si on multplie par un coeff ou autre
 					}
 					//Normal
 					else
@@ -314,6 +315,10 @@ public class WheelDrive : MonoBehaviour
 						wheel.motorTorque = torque;
 					}
 				}
+			}
+			else
+			{
+				rb.constraints = RigidbodyConstraints.FreezeRotationY;
 			}
 
 			// Update visual wheels if any. 

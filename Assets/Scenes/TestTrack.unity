@@ -215,10 +215,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 318010473}
-  centerOfMass: {x: 0, y: -0.5, z: 0}
-  maxAngle: 15
+  centerOfMass: {x: 0, y: -1.5, z: 0}
+  maxAngle: 13
   minAngle: 2
-  maxTorque: 1500
+  maxTorque: 2000
   reverseMaxTorque: 1000
   maxBoostTorque: 3000
   maxSpeed: 30
@@ -389,7 +389,7 @@ MonoBehaviour:
   Left: {fileID: 1472632754}
   Right: {fileID: 739954099}
   rb: {fileID: 318010473}
-  coeff: 2500
+  coeff: 4000
 --- !u!1 &320177897
 GameObject:
   m_ObjectHideFlags: 0
