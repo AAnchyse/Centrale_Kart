@@ -216,13 +216,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 318010473}
   centerOfMass: {x: 0, y: -0.5, z: 0}
-  maxAngle: 20
-  minAngle: 1
+  maxAngle: 15
+  minAngle: 2
   maxTorque: 1500
+  reverseMaxTorque: 1000
   maxBoostTorque: 3000
   maxSpeed: 30
   maxBoostSpeed: 40
-  wheelMesh: {fileID: 115638, guid: 2d269fe0b3459fd4b82b35627ebdb76b, type: 3}
+  wheelMesh: {fileID: 100000, guid: 01c23e3b42e6f4f44b3311dc6f472cfb, type: 3}
   criticalSpeed: 10
   stepsBelow: 20
   stepsAbove: 15
@@ -231,11 +232,11 @@ MonoBehaviour:
   stiffFrontForwardNormal: 20
   stiffFrontForwardDrift: 0.3
   stiffFrontSidewaysNormal: 20
-  stiffFrontSidewaysDrift: 1.9
+  stiffFrontSidewaysDrift: 1.3
   stiffRearForwardNormal: 20
   stiffRearForwardDrift: 6
   stiffRearSidewaysNormal: 20
-  stiffRearSidewaysDrift: 1.82
+  stiffRearSidewaysDrift: 1.23
 --- !u!114 &318010472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -521,7 +522,7 @@ GameObject:
   - component: {fileID: 446464155}
   - component: {fileID: 446464154}
   m_Layer: 0
-  m_Name: Sphere
+  m_Name: Spawn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -542,12 +543,12 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 446464151}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: -4.12, z: 0}
   m_LocalScale: {x: 1, y: 0.9734, z: 1}
   m_Children: []
-  m_Father: {fileID: 673286203}
-  m_RootOrder: 0
+  m_Father: {fileID: 0}
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &474993769
 GameObject:
@@ -691,7 +692,6 @@ GameObject:
   - component: {fileID: 482030215}
   - component: {fileID: 482030214}
   - component: {fileID: 482030219}
-  - component: {fileID: 482030220}
   - component: {fileID: 482030216}
   m_Layer: 0
   m_Name: Main Camera
@@ -810,24 +810,6 @@ MonoBehaviour:
     updateCameraInFixedUpdate: 1
     updateCameraInLateUpdate: 0
     switchViewKey: 32
---- !u!114 &482030220
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 482030213}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6c354aa43afab4698b9fdac83b5587d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  vehicles:
-  - {fileID: 318010470}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  spawnPoints: {fileID: 673286203}
 --- !u!1001 &523998055
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -985,37 +967,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 1412633855}
   m_RootOrder: 0
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &673286202
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 673286203}
-  m_Layer: 0
-  m_Name: SpawnPoints
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &673286203
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 673286202}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children:
-  - {fileID: 446464155}
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &739954098
 GameObject:

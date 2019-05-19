@@ -28,6 +28,9 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Maximum torque applied to the driving wheels.")]
 	public float maxTorque = 300f;
 
+	[Tooltip("Maximum torque applied to the driving wheels when reverse drive.")]
+	public float reverseMaxTorque = 300f;
+
 	[Tooltip("Maximum torque applied to the driving wheels.")]
 	public float maxBoostTorque = 300f;
 
@@ -131,8 +134,12 @@ public class WheelDrive : MonoBehaviour
 	void Update()
 	{
 		//TODO
-		//séparer ce bordel en plusieurs fonctions
-		//adapter configureVehicleSubsteps à partir du graph overlay
+		//séparer ce bordel en plusieurs fonctions, voire scripts
+		//enlever le get magnitude dans update, ça bouffe trop de temps
+		//pb lors du saut, la voiture bouge trop, voir pour l'immobiliser
+		//corriger l'atterrissage (regarder du côté du traction helper)
+		//respawn la voiture quand elle est à l'envers
+		
 
 
 		float angleInput = Input.GetAxis("Horizontal");
@@ -150,8 +157,7 @@ public class WheelDrive : MonoBehaviour
 		//Acceleration
 		if (Input.GetAxis("Vertical") > 0)
 		{
-			if(boostInput>0||boostGauge>0) //boostGauge correspond au temps passé
-			// à drifter au dessus d'un certain seuil de slide
+			if((boostInput>0||boostGauge>0) /* && !isDrifting*/ )
 			{
 				if (boostGauge >0) boostGauge-= Time.deltaTime;
 
@@ -168,7 +174,6 @@ public class WheelDrive : MonoBehaviour
 			}
 			else
 			{
-				
 				if(rb.velocity.magnitude < maxSpeed )
 				{
 					torque =  maxTorque * accInput;
@@ -182,7 +187,7 @@ public class WheelDrive : MonoBehaviour
 			}
 		}
 		//Deceleration
-		else if (accInput == 0)
+		else if (Input.GetAxis("Vertical") == 0)
 		{
 			torque = 0;
 			handBrake = maxTorque; 
@@ -191,19 +196,18 @@ public class WheelDrive : MonoBehaviour
 		else
 		{
 			//Braking
-			if(rb.velocity.z > 0) 
+			if(transform.InverseTransformDirection(rb.velocity).z> 0) 
 			{
-				torque = maxTorque * accInput; 
+				torque = 0; 
 				handBrake = Mathf.Infinity;
 			}
 			//Reverse drive
 			else
 			{
-				torque = maxTorque * accInput;
+				torque = reverseMaxTorque * accInput;
 				handBrake = 0;
 			}
 		}
-
 		//en faire une fonction
 		isGrounded = true;
 		changeStiffness = false;
@@ -215,14 +219,13 @@ public class WheelDrive : MonoBehaviour
 			}
 			else
 			{
-				if((!isDrifting && driftInput >0)||(isDrifting && driftInput ==0)) //donner un boost quand on quitte un dérapage
+				if((!isDrifting && driftInput >0)||(isDrifting && driftInput ==0))
 				{
 					changeStiffness = true;
 				}
 				if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
 				{
 					boostGauge +=Time.deltaTime/2; 
-					Debug.Log(boostGauge);
 				}
 			}
 		}
