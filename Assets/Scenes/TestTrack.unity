@@ -229,6 +229,7 @@ MonoBehaviour:
   stepsAbove: 15
   driveType: 2
   slidingThreshold: 0.3
+  coeffAngleSteer: 2
   stiffFrontForwardNormal: 20
   stiffFrontForwardDrift: 0.3
   stiffFrontSidewaysNormal: 20
@@ -236,7 +237,7 @@ MonoBehaviour:
   stiffRearForwardNormal: 20
   stiffRearForwardDrift: 6
   stiffRearSidewaysNormal: 20
-  stiffRearSidewaysDrift: 1.23
+  stiffRearSidewaysDrift: 1.26
 --- !u!114 &318010472
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -297,7 +298,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 318010470}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0faccab1ba88144196aa00593cd980d, type: 3}
   m_Name: 
@@ -313,7 +314,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 318010470}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d0faccab1ba88144196aa00593cd980d, type: 3}
   m_Name: 

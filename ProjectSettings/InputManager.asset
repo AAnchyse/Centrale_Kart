@@ -35,8 +35,8 @@ InputManager:
     snap: 0
     invert: 0
     type: 0
-    axis: 9
-    joyNum: 1
+    axis: 27
+    joyNum: 16
   - serializedVersion: 3
     m_Name: Drift
     descriptiveName: 

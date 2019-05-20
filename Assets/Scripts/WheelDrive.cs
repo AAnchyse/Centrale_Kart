@@ -55,8 +55,11 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("The vehicle's drive type: rear-wheels drive, front-wheels drive or all-wheels drive.")]
 	public DriveType driveType;
 
-	[Tooltip("threshold at which the boostGauge begins to fill")]
+	[Tooltip("Threshold at which the boostGauge begins to fill")]
 	public float slidingThreshold;
+
+	[Tooltip("Coefficient which multiply the steering angle when drifting")]
+	public float coeffAngleSteer;
 
 	[Tooltip("Friction curves used to change the stiffness of the wheels.")]
 	public float stiffFrontForwardNormal;
@@ -95,8 +98,14 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Indicates if stiffness must be changed.")]
 	private bool changeStiffness;
 
-	[Tooltip("boost duration after a drift.")]
+	[Tooltip("Boost duration after a drift.")]
 	private float boostGauge;
+
+	[Tooltip("Velocity of the rigidbody.")]
+	private float speed;
+
+	[Tooltip("Acceleration applied on wheel torque, depending of rigidbody velocity.")]
+	private float acc;
 
 
     // Find all the WheelColliders down in the hierarchy and instantiate wheel meshes
@@ -131,37 +140,42 @@ public class WheelDrive : MonoBehaviour
 		wheel.forwardFriction = frictionCurveForward;
 		wheel.sidewaysFriction = frictionCurveSideways;
 	}
+
 	void Update()
 	{
 		//TODO
 		//séparer ce bordel en plusieurs fonctions, voire scripts
+		//tester sans aircontrol
+		//tester sans anti roll bar
 		//enlever le get magnitude dans update, ça bouffe trop de temps
-		//pb lors du saut, la voiture bouge trop, voir pour l'immobiliser
-		//corriger l'atterrissage (regarder du côté du traction helper)
-		//respawn la voiture quand elle est à l'envers
+		//respawn la voiture quand elle est à l'envers (autre script)
 		
 		float angleInput = Input.GetAxis("Horizontal");
 
-		float accInput = Input.GetAxis("Vertical")*(maxSpeed - rb.velocity.magnitude) / maxSpeed;
+		float accInput = Input.GetAxis("Vertical");
 
 		float driftInput = Input.GetAxis("Drift");
 
-		float boostInput = Input.GetAxis("Boost")*(maxBoostSpeed - rb.velocity.magnitude) / maxBoostSpeed;
+		float boostInput = Input.GetAxis("Boost");
 
 		handBrake = 0;
 
 		torque = 0;
 
+		speed = rb.velocity.magnitude; //voir pour trouver mieux pour avoir la vitesse
+
+		acc = accInput*(maxSpeed - speed) / maxSpeed;
+
 		//Acceleration
-		if (Input.GetAxis("Vertical") > 0)
+		if (accInput > 0)
 		{
 			if((boostInput>0||boostGauge>0) /* && !isDrifting*/ )
 			{
 				if (boostGauge >0) boostGauge-= Time.deltaTime;
 
-				if(rb.velocity.magnitude < maxBoostSpeed )
+				if(speed < maxBoostSpeed )
 				{
-					torque =  maxBoostTorque *(maxBoostSpeed - rb.velocity.magnitude) / maxBoostSpeed;
+					torque =  maxBoostTorque *(maxBoostSpeed - speed) / maxBoostSpeed;
 					handBrake = 0;
 				}
 				else
@@ -172,9 +186,9 @@ public class WheelDrive : MonoBehaviour
 			}
 			else
 			{
-				if(rb.velocity.magnitude < maxSpeed )
+				if(speed < maxSpeed )
 				{
-					torque =  maxTorque * accInput;
+					torque =  maxTorque * acc;
 					handBrake = 0;
 				}
 				else
@@ -185,10 +199,10 @@ public class WheelDrive : MonoBehaviour
 			}
 		}
 		//Deceleration
-		else if (Input.GetAxis("Vertical") == 0)
+		else if (accInput == 0)
 		{
 			torque = 0;
-			handBrake = maxTorque; 
+			handBrake = maxTorque;
 		}
 		// Braking or reverse drive
 		else
@@ -196,25 +210,24 @@ public class WheelDrive : MonoBehaviour
 			//Braking
 			if(transform.InverseTransformDirection(rb.velocity).z> 0) 
 			{
-				torque = 0; 
+				torque = 0;
 				handBrake = Mathf.Infinity;
 			}
 			//Reverse drive
 			else
 			{
-				torque = reverseMaxTorque * accInput;
+				torque = reverseMaxTorque * acc;
 				handBrake = 0;
 			}
 		}
 		//en faire une fonction
 		isGrounded = true;
 		changeStiffness = false;
-		float count = 0;
 		foreach (WheelCollider wheel in m_Wheels)
 		{
 			if (!wheel.GetGroundHit(out WheelHit hit))
 			{
-				count +=1;
+				isGrounded = false;
 			}
 			else
 			{
@@ -228,7 +241,6 @@ public class WheelDrive : MonoBehaviour
 				}
 			}
 		}
-		if (count==4 )isGrounded = false;
 
 		//Move wheels
 		foreach (WheelCollider wheel in m_Wheels)
@@ -236,19 +248,13 @@ public class WheelDrive : MonoBehaviour
 			if (isGrounded)
 			{
 				rb.constraints = RigidbodyConstraints.None;
+
 				// Front wheels
 				if (wheel.transform.localPosition.z >= 0)
 				{
-					//Steering
-					if(boostInput>0||boostGauge>0)
-					{
-						//multiplié par coeff?
-						angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * rb.velocity.magnitude + maxAngle);
-					}
-					else
-					{
-						angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * rb.velocity.magnitude + maxAngle);
-					}
+					//Normal Steering
+					angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
+
 					//Drifting
 					if (driftInput>0)
 					{
@@ -258,9 +264,9 @@ public class WheelDrive : MonoBehaviour
 							ChangeFriction(wheel , stiffFrontForwardDrift , stiffFrontSidewaysDrift);
 							isDrifting =true;
 						}
-						
+
 						//Steering
-						angle *=2; //à voir si on multplie par un coeff ou autre
+						angle *=coeffAngleSteer; 
 					}
 					//Normal
 					else
@@ -321,14 +327,14 @@ public class WheelDrive : MonoBehaviour
 				rb.constraints = RigidbodyConstraints.FreezeRotationY;
 			}
 
-			// Update visual wheels if any. 
+			// Update visual wheels 
 			if (wheelMesh) 
 			{
 				Quaternion q;
 				Vector3 p;
 				wheel.GetWorldPose (out p, out q);
 
-				// Assume that the only child of the wheelcollider is the wheel shape.
+				// Assume that the only child of the wheelcollider is the wheel mesh
 				Transform shapeTransform = wheel.transform.GetChild (0);
 				shapeTransform.position = p;
 				shapeTransform.rotation = q;
