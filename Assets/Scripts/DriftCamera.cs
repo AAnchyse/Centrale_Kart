@@ -19,6 +19,7 @@ public class DriftCamera : MonoBehaviour
     public AdvancedOptions advancedOptions;
 
     bool m_ShowingSideView;
+    float camInput;
 
     private void FixedUpdate ()
     {
@@ -28,9 +29,16 @@ public class DriftCamera : MonoBehaviour
 
     private void Update ()
     {
-        if (Input.GetKeyDown (advancedOptions.switchViewKey))
-            m_ShowingSideView = !m_ShowingSideView;
+        float camInput = Input.GetAxis("Cam");
 
+        if (camInput >0)
+        {
+            m_ShowingSideView = true;
+        }
+        else
+        {
+            m_ShowingSideView = false;
+        }
         if(advancedOptions.updateCameraInUpdate)
             UpdateCamera ();
     }

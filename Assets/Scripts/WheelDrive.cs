@@ -61,6 +61,9 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Coefficient which multiply the steering angle when drifting")]
 	public float coeffAngleSteer;
 
+	[Tooltip("Indicates if the 4 car's wheels are grounded.")]
+	public static bool isGrounded;
+
 	[Tooltip("Friction curves used to change the stiffness of the wheels.")]
 	public float stiffFrontForwardNormal;
 	public float stiffFrontForwardDrift;
@@ -91,9 +94,6 @@ public class WheelDrive : MonoBehaviour
 
 	[Tooltip("Indicates if we are drifting or not.")]
 	private bool isDrifting;
-
-	[Tooltip("Indicates if the 4 car's wheels are grounded.")]
-	public static bool isGrounded;
 
 	[Tooltip("Indicates if stiffness must be changed.")]
 	private bool changeStiffness;
@@ -142,14 +142,7 @@ public class WheelDrive : MonoBehaviour
 	}
 
 	void Update()
-	{
-		//TODO
-		//séparer ce bordel en plusieurs fonctions, voire scripts
-		//tester sans aircontrol
-		//tester sans anti roll bar
-		//enlever le get magnitude dans update, ça bouffe trop de temps
-		//respawn la voiture quand elle est à l'envers (autre script)
-		
+	{	
 		float angleInput = Input.GetAxis("Horizontal");
 
 		float accInput = Input.GetAxis("Vertical");
@@ -162,14 +155,15 @@ public class WheelDrive : MonoBehaviour
 
 		torque = 0;
 
-		speed = rb.velocity.magnitude; //voir pour trouver mieux pour avoir la vitesse
+		speed = rb.velocity.magnitude;
 
 		acc = accInput*(maxSpeed - speed) / maxSpeed;
 
 		//Acceleration
 		if (accInput > 0)
 		{
-			if((boostInput>0||boostGauge>0) /* && !isDrifting*/ )
+			// Use boost
+			if(boostInput>0||boostGauge>0)
 			{
 				if (boostGauge >0) boostGauge-= Time.deltaTime;
 
@@ -184,6 +178,7 @@ public class WheelDrive : MonoBehaviour
 					handBrake = maxBoostTorque;
 				}
 			}
+			// Normal drive
 			else
 			{
 				if(speed < maxSpeed )
@@ -207,47 +202,51 @@ public class WheelDrive : MonoBehaviour
 		// Braking or reverse drive
 		else
 		{
-			//Braking
+			// Braking
 			if(transform.InverseTransformDirection(rb.velocity).z> 0) 
 			{
 				torque = 0;
 				handBrake = Mathf.Infinity;
 			}
-			//Reverse drive
+			// Reverse drive
 			else
 			{
 				torque = reverseMaxTorque * acc;
 				handBrake = 0;
 			}
 		}
-		//en faire une fonction
-		isGrounded = true;
+			
+		// Change wheel stiffness
 		changeStiffness = false;
+		if((!isDrifting && driftInput >0)||(isDrifting && driftInput ==0))
+		{
+			changeStiffness = true;
+		}
+		
+		// Check if all wheels are grounded
+		isGrounded = true;
 		foreach (WheelCollider wheel in m_Wheels)
 		{
 			if (!wheel.GetGroundHit(out WheelHit hit))
 			{
 				isGrounded = false;
 			}
-			else
-			{
-				if((!isDrifting && driftInput >0)||(isDrifting && driftInput ==0))
-				{
-					changeStiffness = true;
-				}
-				if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
-				{
-					boostGauge +=Time.deltaTime/2;
-				}
-			}
 		}
 
-		//Move wheels
+		// Move wheels
 		foreach (WheelCollider wheel in m_Wheels)
 		{
 			if (isGrounded)
 			{
+				// Remove constraints
 				rb.constraints = RigidbodyConstraints.None;
+				
+				// Fill the boost gauge
+				wheel.GetGroundHit(out WheelHit hit);
+				if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
+				{
+					boostGauge +=Time.deltaTime/2;
+				}
 
 				// Front wheels
 				if (wheel.transform.localPosition.z >= 0)
@@ -265,7 +264,7 @@ public class WheelDrive : MonoBehaviour
 							isDrifting =true;
 						}
 
-						//Steering
+						//Drift Steering
 						angle *=coeffAngleSteer; 
 					}
 					//Normal
@@ -278,14 +277,11 @@ public class WheelDrive : MonoBehaviour
 							isDrifting =false;
 						}
 					}
-					
+					//Steering angle
 					wheel.steerAngle = angle;
 					
-					//Torque if 4x4
-					if(driveType != DriveType.RearWheelDrive)
-					{
-						wheel.motorTorque = torque;
-					}
+					//Torque
+					wheel.motorTorque = torque;
 				}
 
 				//Rear wheels
@@ -311,19 +307,16 @@ public class WheelDrive : MonoBehaviour
 							isDrifting =false;
 						}
 					}
-
 					//Braking
 					wheel.brakeTorque = handBrake;
 
 					//Torque
-					if(driveType != DriveType.FrontWheelDrive)
-					{
-						wheel.motorTorque = torque;
-					}
+					wheel.motorTorque = torque;
 				}
 			}
 			else
 			{
+				// Keep car direction while in air 
 				rb.constraints = RigidbodyConstraints.FreezeRotationY;
 			}
 
