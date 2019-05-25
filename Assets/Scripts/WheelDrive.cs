@@ -38,7 +38,7 @@ public class WheelDrive : MonoBehaviour
 	public float maxSpeed =50;
 
 	[Tooltip("Maximum vehicle's speed (in m/s).")]
-	public float maxBoostSpeed =50;
+	public static float maxBoostSpeed =40;
 
 	[Tooltip("If you need the visual wheels to be attached automatically, drag the wheel shape here.")]
 	public GameObject wheelMesh;
@@ -62,7 +62,20 @@ public class WheelDrive : MonoBehaviour
 	public float coeffAngleSteer;
 
 	[Tooltip("Indicates if the 4 car's wheels are grounded.")]
+	[HideInInspector]
 	public static bool isGrounded;
+
+	[Tooltip("Velocity of the rigidbody.")]
+	[HideInInspector]
+	public static float speed;
+
+	[Tooltip("Indicates if bracking button is pushed.")]
+	[HideInInspector]
+	public static bool isBracking;
+
+	[Tooltip("Indicates if we are skidding or not.")]
+	[HideInInspector]
+	public static bool isSkidding;
 
 	[Tooltip("Friction curves used to change the stiffness of the wheels.")]
 	public float stiffFrontForwardNormal;
@@ -92,20 +105,17 @@ public class WheelDrive : MonoBehaviour
 	private WheelFrictionCurve frictionCurveForward;
 	private WheelFrictionCurve frictionCurveSideways;
 
-	[Tooltip("Indicates if we are drifting or not.")]
-	private bool isDrifting;
-
 	[Tooltip("Indicates if stiffness must be changed.")]
 	private bool changeStiffness;
 
 	[Tooltip("Boost duration after a drift.")]
 	private float boostGauge;
 
-	[Tooltip("Velocity of the rigidbody.")]
-	private float speed;
-
 	[Tooltip("Acceleration applied on wheel torque, depending of rigidbody velocity.")]
 	private float acc;
+
+	[Tooltip("Indicates if we are drifting or not.")]
+	private bool isDrifting;
 
 
     // Find all the WheelColliders down in the hierarchy and instantiate wheel meshes
@@ -129,6 +139,8 @@ public class WheelDrive : MonoBehaviour
 		}
 
 		isDrifting = false;
+
+		isBracking = false;
 	}
 
 	void ChangeFriction(WheelCollider wheel , float stiffnessForward , float stiffnessSideways)
@@ -158,6 +170,10 @@ public class WheelDrive : MonoBehaviour
 		speed = rb.velocity.magnitude;
 
 		acc = accInput*(maxSpeed - speed) / maxSpeed;
+
+		isBracking = false;
+
+		isSkidding =false;
 
 		//Acceleration
 		if (accInput > 0)
@@ -202,6 +218,7 @@ public class WheelDrive : MonoBehaviour
 		// Braking or reverse drive
 		else
 		{
+			isBracking = true;
 			// Braking
 			if(transform.InverseTransformDirection(rb.velocity).z> 0) 
 			{
@@ -246,6 +263,7 @@ public class WheelDrive : MonoBehaviour
 				if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
 				{
 					boostGauge +=Time.deltaTime/2;
+					isSkidding =true;
 				}
 
 				// Front wheels
@@ -318,6 +336,7 @@ public class WheelDrive : MonoBehaviour
 			{
 				// Keep car direction while in air 
 				rb.constraints = RigidbodyConstraints.FreezeRotationY;
+				boostGauge = 0;
 			}
 
 			// Update visual wheels 

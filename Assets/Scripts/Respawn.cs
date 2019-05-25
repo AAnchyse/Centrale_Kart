@@ -8,10 +8,13 @@ public class Respawn : MonoBehaviour
     public Transform spawn;
 
     public float height;
-    // Update is called once per frame
+
+    private RaycastHit hit;
+    private int layerMask = 1 << 8;
+
     void Update()
     {
-        if (vehicle.position.y<height)
+        if (vehicle.position.y<height || Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out hit, 3, layerMask))
         {
             vehicle.SetPositionAndRotation(spawn.position,spawn.rotation);
             vehicle.GetComponent<Rigidbody>().velocity = new Vector3(0,0,0);
