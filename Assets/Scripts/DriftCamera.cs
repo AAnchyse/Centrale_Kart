@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using Luminosity.IO;
 
 public class DriftCamera : MonoBehaviour
 {
@@ -9,7 +10,6 @@ public class DriftCamera : MonoBehaviour
         public bool updateCameraInUpdate;
         public bool updateCameraInFixedUpdate = true;
         public bool updateCameraInLateUpdate;
-        public KeyCode switchViewKey = KeyCode.Space;
     }
 
     public float smoothing = 6f;
@@ -29,7 +29,7 @@ public class DriftCamera : MonoBehaviour
 
     private void Update ()
     {
-        float camInput = Input.GetAxis("Cam");
+        float camInput = InputManager.GetAxis("Cam");
 
         if (camInput >0)
         {

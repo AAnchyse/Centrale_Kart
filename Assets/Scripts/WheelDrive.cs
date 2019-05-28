@@ -1,13 +1,7 @@
 ﻿using UnityEngine;
 using System;
-
-[Serializable]
-public enum DriveType
-{
-	RearWheelDrive,
-	FrontWheelDrive,
-	AllWheelDrive
-}
+using UnityEngine.Events;
+using Luminosity.IO;
 
 public class WheelDrive : MonoBehaviour
 {
@@ -52,14 +46,14 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Simulation sub-steps when the speed is below critical.")]
 	public int stepsAbove = 1;
 
-	[Tooltip("The vehicle's drive type: rear-wheels drive, front-wheels drive or all-wheels drive.")]
-	public DriveType driveType;
-
 	[Tooltip("Threshold at which the boostGauge begins to fill")]
 	public float slidingThreshold;
 
 	[Tooltip("Coefficient which multiply the steering angle when drifting")]
 	public float coeffAngleSteer;
+
+	[Tooltip("Minimum time while not grounded to get haptic feedback")]
+	public float minAirTime = 1;
 
 	[Tooltip("Indicates if the 4 car's wheels are grounded.")]
 	[HideInInspector]
@@ -76,6 +70,14 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Indicates if we are skidding or not.")]
 	[HideInInspector]
 	public static bool isSkidding;
+
+	[Tooltip("Boost duration after a drift.")]
+	[HideInInspector]
+	public static float boostGauge;
+
+	[Tooltip("Event when car landed.")]
+	[HideInInspector]
+	public static UnityEvent landedEvent;
 
 	[Tooltip("Friction curves used to change the stiffness of the wheels.")]
 	public float stiffFrontForwardNormal;
@@ -108,14 +110,14 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Indicates if stiffness must be changed.")]
 	private bool changeStiffness;
 
-	[Tooltip("Boost duration after a drift.")]
-	private float boostGauge;
-
 	[Tooltip("Acceleration applied on wheel torque, depending of rigidbody velocity.")]
 	private float acc;
 
 	[Tooltip("Indicates if we are drifting or not.")]
 	private bool isDrifting;
+
+	[Tooltip("Time spent when not grounded. Used for haptic feedback at landing")]
+	private float airTime;
 
 
     // Find all the WheelColliders down in the hierarchy and instantiate wheel meshes
@@ -141,6 +143,10 @@ public class WheelDrive : MonoBehaviour
 		isDrifting = false;
 
 		isBracking = false;
+
+		airTime =0;
+
+		landedEvent = new UnityEvent();
 	}
 
 	void ChangeFriction(WheelCollider wheel , float stiffnessForward , float stiffnessSideways)
@@ -155,13 +161,15 @@ public class WheelDrive : MonoBehaviour
 
 	void Update()
 	{	
-		float angleInput = Input.GetAxis("Horizontal");
+		float angleInput = InputManager.GetAxis("Turn");
 
-		float accInput = Input.GetAxis("Vertical");
+		bool accInput = InputManager.GetButton("Acceleration");
 
-		float driftInput = Input.GetAxis("Drift");
+		bool brakeInput = InputManager.GetButton("Brake");
 
-		float boostInput = Input.GetAxis("Boost");
+		bool driftInput = InputManager.GetButton("Drift");
+
+		bool boostInput = InputManager.GetButton("Boost");
 
 		handBrake = 0;
 
@@ -169,17 +177,17 @@ public class WheelDrive : MonoBehaviour
 
 		speed = rb.velocity.magnitude;
 
-		acc = accInput*(maxSpeed - speed) / maxSpeed;
+		acc = (maxSpeed - speed) / maxSpeed;
 
 		isBracking = false;
 
 		isSkidding =false;
 
 		//Acceleration
-		if (accInput > 0)
+		if (accInput)
 		{
 			// Use boost
-			if(boostInput>0||boostGauge>0)
+			if(boostInput||boostGauge>0)
 			{
 				if (boostGauge >0) boostGauge-= Time.deltaTime;
 
@@ -209,16 +217,13 @@ public class WheelDrive : MonoBehaviour
 				}
 			}
 		}
-		//Deceleration
-		else if (accInput == 0)
-		{
-			torque = 0;
-			handBrake = maxTorque;
-		}
+
 		// Braking or reverse drive
-		else
+		else if (brakeInput)
 		{
 			isBracking = true;
+			boostGauge = 0;
+			
 			// Braking
 			if(transform.InverseTransformDirection(rb.velocity).z> 0) 
 			{
@@ -228,14 +233,22 @@ public class WheelDrive : MonoBehaviour
 			// Reverse drive
 			else
 			{
-				torque = reverseMaxTorque * acc;
+				torque = -reverseMaxTorque * acc;
 				handBrake = 0;
 			}
+		}
+
+		//Deceleration
+		else
+		{
+			torque = 0;
+			handBrake = maxTorque;
+			boostGauge = 0;
 		}
 			
 		// Change wheel stiffness
 		changeStiffness = false;
-		if((!isDrifting && driftInput >0)||(isDrifting && driftInput ==0))
+		if((!isDrifting && driftInput)||(isDrifting && !driftInput ))
 		{
 			changeStiffness = true;
 		}
@@ -257,6 +270,11 @@ public class WheelDrive : MonoBehaviour
 			{
 				// Remove constraints
 				rb.constraints = RigidbodyConstraints.None;
+
+				if(airTime>minAirTime)
+					landedEvent.Invoke();
+				//Reset airTime
+				airTime = 0;
 				
 				// Fill the boost gauge
 				wheel.GetGroundHit(out WheelHit hit);
@@ -273,7 +291,7 @@ public class WheelDrive : MonoBehaviour
 					angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
 
 					//Drifting
-					if (driftInput>0)
+					if (driftInput)
 					{
 						if(changeStiffness)
 						{
@@ -306,7 +324,7 @@ public class WheelDrive : MonoBehaviour
 				if (wheel.transform.localPosition.z < 0)
 				{
 					//Drifting
-					if (driftInput>0)
+					if (driftInput)
 					{
 						if (changeStiffness)
 						{
@@ -337,6 +355,7 @@ public class WheelDrive : MonoBehaviour
 				// Keep car direction while in air 
 				rb.constraints = RigidbodyConstraints.FreezeRotationY;
 				boostGauge = 0;
+				airTime += Time.deltaTime;
 			}
 
 			// Update visual wheels 
