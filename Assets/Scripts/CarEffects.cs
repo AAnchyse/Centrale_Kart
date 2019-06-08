@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class CarEffects : MonoBehaviour
 {
+    public WheelDrive wheelDrive;
 
     public AudioSource motor;
 
@@ -13,9 +14,9 @@ public class CarEffects : MonoBehaviour
 
     void Update()
     {
-        motor.pitch = WheelDrive.speed / WheelDrive.maxBoostSpeed +initialMotorPitch;
+        motor.pitch = wheelDrive.speed / wheelDrive.maxBoostSpeed +initialMotorPitch;
 
-        if(WheelDrive.isBracking)
+        if(wheelDrive.isBracking)
             backLights.SetActive(true);
         else
             backLights.SetActive(false);

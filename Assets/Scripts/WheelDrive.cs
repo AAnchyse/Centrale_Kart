@@ -7,10 +7,12 @@ public class WheelDrive : MonoBehaviour
 {
 	//Public 
 
+	public PlayerID playerID;
+
 	[Tooltip("Rigidbody of the vehicle.")]
 	public Rigidbody rb;
 
-	[Tooltip("Position of the center of mass.")]
+	[Tooltip("Position of the center of mass of the rigidbody.")]
 	public Vector3 centerOfMass;	
 
     [Tooltip("Maximum steering angle of the wheels.")]
@@ -30,9 +32,9 @@ public class WheelDrive : MonoBehaviour
 
 	[Tooltip("Maximum vehicle's speed (in m/s).")]
 	public float maxSpeed =50;
-
+	
 	[Tooltip("Maximum vehicle's speed (in m/s).")]
-	public static float maxBoostSpeed =40;
+	public float maxBoostSpeed =40;
 
 	[Tooltip("If you need the visual wheels to be attached automatically, drag the wheel shape here.")]
 	public GameObject wheelMesh;
@@ -57,27 +59,25 @@ public class WheelDrive : MonoBehaviour
 
 	[Tooltip("Indicates if the 4 car's wheels are grounded.")]
 	[HideInInspector]
-	public static bool isGrounded;
+	public bool isGrounded;
 
 	[Tooltip("Velocity of the rigidbody.")]
 	[HideInInspector]
-	public static float speed;
+	public float speed;
 
 	[Tooltip("Indicates if bracking button is pushed.")]
 	[HideInInspector]
-	public static bool isBracking;
+	public bool isBracking;
 
 	[Tooltip("Indicates if we are skidding or not.")]
 	[HideInInspector]
-	public static bool isSkidding;
+	public bool isSkidding;
 
 	[Tooltip("Boost duration after a drift.")]
 	[HideInInspector]
-	public static float boostGauge;
+	public float boostGauge;
 
-	[Tooltip("Event when car landed.")]
-	[HideInInspector]
-	public static UnityEvent landedEvent;
+	public Vibrations vibrations;
 
 	[Tooltip("Friction curves used to change the stiffness of the wheels.")]
 	public float stiffFrontForwardNormal;
@@ -119,6 +119,12 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Time spent when not grounded. Used for haptic feedback at landing")]
 	private float airTime;
 
+	[Tooltip("List of player's inputs")]
+	private float angleInput;
+	private bool accInput;
+	private bool brakeInput;
+	private bool driftInput;
+	private bool boostInput;
 
     // Find all the WheelColliders down in the hierarchy and instantiate wheel meshes
 	void Start()
@@ -145,8 +151,6 @@ public class WheelDrive : MonoBehaviour
 		isBracking = false;
 
 		airTime =0;
-
-		landedEvent = new UnityEvent();
 	}
 
 	void ChangeFriction(WheelCollider wheel , float stiffnessForward , float stiffnessSideways)
@@ -161,15 +165,15 @@ public class WheelDrive : MonoBehaviour
 
 	void Update()
 	{	
-		float angleInput = InputManager.GetAxis("Turn");
+		angleInput = InputManager.GetAxis("Turn",playerID);
 
-		bool accInput = InputManager.GetButton("Acceleration");
+		accInput = InputManager.GetButton("Acceleration",playerID);
 
-		bool brakeInput = InputManager.GetButton("Brake");
+		brakeInput = InputManager.GetButton("Brake",playerID);
 
-		bool driftInput = InputManager.GetButton("Drift");
+		driftInput = InputManager.GetButton("Drift",playerID);
 
-		bool boostInput = InputManager.GetButton("Boost");
+		boostInput = InputManager.GetButton("Boost",playerID);
 
 		handBrake = 0;
 
@@ -252,7 +256,7 @@ public class WheelDrive : MonoBehaviour
 		{
 			changeStiffness = true;
 		}
-		
+
 		// Check if all wheels are grounded
 		isGrounded = true;
 		foreach (WheelCollider wheel in m_Wheels)
@@ -260,102 +264,6 @@ public class WheelDrive : MonoBehaviour
 			if (!wheel.GetGroundHit(out WheelHit hit))
 			{
 				isGrounded = false;
-			}
-		}
-
-		// Move wheels
-		foreach (WheelCollider wheel in m_Wheels)
-		{
-			if (isGrounded)
-			{
-				// Remove constraints
-				rb.constraints = RigidbodyConstraints.None;
-
-				if(airTime>minAirTime)
-					landedEvent.Invoke();
-				//Reset airTime
-				airTime = 0;
-				
-				// Fill the boost gauge
-				wheel.GetGroundHit(out WheelHit hit);
-				if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
-				{
-					boostGauge +=Time.deltaTime/2;
-					isSkidding =true;
-				}
-
-				// Front wheels
-				if (wheel.transform.localPosition.z >= 0)
-				{
-					//Normal Steering
-					angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
-
-					//Drifting
-					if (driftInput)
-					{
-						if(changeStiffness)
-						{
-							//Friction
-							ChangeFriction(wheel , stiffFrontForwardDrift , stiffFrontSidewaysDrift);
-							isDrifting =true;
-						}
-
-						//Drift Steering
-						angle *=coeffAngleSteer; 
-					}
-					//Normal
-					else
-					{
-						if (changeStiffness)
-						{
-							//Friction
-							ChangeFriction(wheel , stiffFrontForwardNormal , stiffFrontSidewaysNormal);
-							isDrifting =false;
-						}
-					}
-					//Steering angle
-					wheel.steerAngle = angle;
-					
-					//Torque
-					wheel.motorTorque = torque;
-				}
-
-				//Rear wheels
-				if (wheel.transform.localPosition.z < 0)
-				{
-					//Drifting
-					if (driftInput)
-					{
-						if (changeStiffness)
-						{
-							//Friction
-							ChangeFriction(wheel , stiffRearForwardDrift , stiffRearSidewaysDrift);
-							isDrifting =true;
-						}
-					}
-					//Normal
-					else
-					{
-						if (changeStiffness)
-						{
-							//Friction
-							ChangeFriction(wheel , stiffRearForwardNormal , stiffRearSidewaysNormal);
-							isDrifting =false;
-						}
-					}
-					//Braking
-					wheel.brakeTorque = handBrake;
-
-					//Torque
-					wheel.motorTorque = torque;
-				}
-			}
-			else
-			{
-				// Keep car direction while in air 
-				rb.constraints = RigidbodyConstraints.FreezeRotationY;
-				boostGauge = 0;
-				airTime += Time.deltaTime;
 			}
 
 			// Update visual wheels 
@@ -369,6 +277,107 @@ public class WheelDrive : MonoBehaviour
 				Transform shapeTransform = wheel.transform.GetChild (0);
 				shapeTransform.position = p;
 				shapeTransform.rotation = q;
+			}
+		}
+	}
+	void FixedUpdate()
+	{
+		// Move wheels
+		foreach (WheelCollider wheel in m_Wheels)
+		{
+			if (isGrounded)
+			{
+				// Remove constraints
+				rb.constraints = RigidbodyConstraints.None;
+
+				if(airTime>minAirTime)
+					//landedEvent.Invoke();
+					vibrations.landed = true;
+
+				//Reset airTime
+				airTime = 0;
+
+			}
+			else
+			{
+				// Keep car direction while in air 
+				rb.constraints = RigidbodyConstraints.FreezeRotationY;
+				boostGauge = 0;
+				airTime += Time.fixedDeltaTime;
+			}
+			
+			// Fill the boost gauge
+			wheel.GetGroundHit(out WheelHit hit);
+			if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
+			{
+				boostGauge +=Time.fixedDeltaTime/2;
+				isSkidding =true;
+			}
+
+			// Front wheels
+			if (wheel.transform.localPosition.z >= 0)
+			{
+				//Normal Steering
+				angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
+
+				//Drifting
+				if (driftInput)
+				{
+					if(changeStiffness)
+					{
+						//Friction
+						ChangeFriction(wheel , stiffFrontForwardDrift , stiffFrontSidewaysDrift);
+						isDrifting =true;
+					}
+
+					//Drift Steering
+					angle *=coeffAngleSteer; 
+				}
+				//Normal
+				else
+				{
+					if (changeStiffness)
+					{
+						//Friction
+						ChangeFriction(wheel , stiffFrontForwardNormal , stiffFrontSidewaysNormal);
+						isDrifting =false;
+					}
+				}
+				//Steering angle
+				wheel.steerAngle = angle;
+				
+				//Torque
+				wheel.motorTorque = torque;
+			}
+
+			//Rear wheels
+			if (wheel.transform.localPosition.z < 0)
+			{
+				//Drifting
+				if (driftInput)
+				{
+					if (changeStiffness)
+					{
+						//Friction
+						ChangeFriction(wheel , stiffRearForwardDrift , stiffRearSidewaysDrift);
+						isDrifting =true;
+					}
+				}
+				//Normal
+				else
+				{
+					if (changeStiffness)
+					{
+						//Friction
+						ChangeFriction(wheel , stiffRearForwardNormal , stiffRearSidewaysNormal);
+						isDrifting =false;
+					}
+				}
+				//Braking
+				wheel.brakeTorque = handBrake;
+
+				//Torque
+				wheel.motorTorque = torque;
 			}
 		}
 	}

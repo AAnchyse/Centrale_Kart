@@ -7,12 +7,17 @@ using UnityEngine.Events;
 
 public class Vibrations : MonoBehaviour
 {
+    public WheelDrive wheelDrive;
+    public PlayerID playerID;
+    public PlayerIndex playerIndex;
 	public GamepadVibration vibration;
     public Rigidbody rb;
     public float landingForce;
     public float delayMax;
 
-    private bool landed;
+    [HideInInspector]
+    public bool landed;
+
     private float delay;
 
 
@@ -22,21 +27,22 @@ public class Vibrations : MonoBehaviour
         landed = false;
         delay = 0;
 
-        WheelDrive.landedEvent.AddListener(Landed);
+        //wheelDrive.landedEvent.AddListener(Landed);
     }
 
-    void Landed()
+   /* void Landed()
     {
         landed = true;
-    }
+        print("coucou");
+    }*/
 
     void Update()
     {
-        bool driftInput = InputManager.GetButton("Drift");
+        bool driftInput = InputManager.GetButton("Drift",playerID);
 
-        if (!WheelDrive.isSkidding && WheelDrive.boostGauge >0 && !driftInput)
+        if (!wheelDrive.isSkidding && wheelDrive.boostGauge >0 && !driftInput)
         {
-            vibration.LeftMotor = Mathf.Clamp(WheelDrive.boostGauge, 0 ,0.05f);
+            vibration.LeftMotor = Mathf.Clamp(wheelDrive.boostGauge, 0 ,0.05f);
 		    vibration.RightMotor = vibration.LeftMotor;
         }
 
@@ -58,6 +64,6 @@ public class Vibrations : MonoBehaviour
 		    vibration.RightMotor = vibration.LeftMotor;
         }    
 
-        GamePad.SetVibration(0, vibration.LeftMotor, vibration.RightMotor); //0 to 65
+        GamePad.SetVibration(playerIndex, vibration.LeftMotor, vibration.RightMotor); //0 to 65
     }
 }

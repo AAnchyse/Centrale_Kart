@@ -6,12 +6,12 @@ public class CarSwitcher : MonoBehaviour
 	public List<GameObject> vehicles;
 	public Transform spawnPoints;
 
-	private DriftCamera m_DriftCamera;
+	private SwitchCamera m_SwitchCamera;
 	private int m_VehicleId;
 
 	void Start () 
     {
-		m_DriftCamera = GetComponent<DriftCamera>();
+		m_SwitchCamera = GetComponent<SwitchCamera>();
 	}
 	
 	void Update () 
@@ -36,9 +36,9 @@ public class CarSwitcher : MonoBehaviour
 			Transform vehicleT = vehicles[m_VehicleId].transform;
 			Transform camRig = vehicleT.Find("CamRig");
 
-			m_DriftCamera.lookAtTarget = camRig.Find("CamLookAtTarget");
-			m_DriftCamera.positionTarget = camRig.Find("CamPosition");
-			m_DriftCamera.sideView = camRig.Find("CamSidePosition");
+			/*m_SwitchCamera.lookAtTarget = camRig.Find("CamLookAtTarget");
+			m_SwitchCamera.positionTarget = camRig.Find("CamPosition");
+			m_SwitchCamera.sideView = camRig.Find("CamSidePosition");*/
 		}
 
 		if (Input.GetKeyUp(KeyCode.R))

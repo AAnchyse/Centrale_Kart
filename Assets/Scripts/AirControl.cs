@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class AirControl : MonoBehaviour
 {
+    public WheelDrive wheelDrive;
     public Transform Front;
     public Transform Rear;
     public Transform Left;
@@ -13,7 +14,7 @@ public class AirControl : MonoBehaviour
     public float coeff;
     void FixedUpdate()
     {
-        if(! WheelDrive.isGrounded)
+        if(! wheelDrive.isGrounded)
         {
             rb.AddRelativeTorque(-Vector3.forward*coeff*(Right.position.y-Left.position.y));
             rb.AddRelativeTorque(Vector3.right*coeff*(Front.position.y-Rear.position.y));

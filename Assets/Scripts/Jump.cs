@@ -5,14 +5,16 @@ using Luminosity.IO;
 
 public class Jump : MonoBehaviour
 {
+    public WheelDrive wheelDrive;
+    public PlayerID playerID;
     public float jumpForce;
     public Rigidbody rb;
 
     void Update()
     {
-        float jumpInput = InputManager.GetAxis("Jump");
+        float jumpInput = InputManager.GetAxis("Jump",playerID);
         
-        if(WheelDrive.isGrounded && jumpInput >0)
+        if(wheelDrive.isGrounded && jumpInput >0)
         {
             rb.AddForce(transform.InverseTransformDirection(transform.up) * jumpForce);
         }
