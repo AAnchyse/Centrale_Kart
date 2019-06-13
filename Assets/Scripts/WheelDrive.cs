@@ -5,7 +5,7 @@ using Luminosity.IO;
 
 public class WheelDrive : MonoBehaviour
 {
-	//Public 
+	//Public
 
 	public PlayerID playerID;
 
@@ -20,6 +20,12 @@ public class WheelDrive : MonoBehaviour
 
 	[Tooltip("Minimum steering angle of the wheels.")]
 	public float minAngle = 5f;
+
+	[Tooltip("Maximum steering angle of the wheels when boost .")]
+	public float maxBoostAngle = 30f;
+
+	[Tooltip("Minimum steering angle of the wheels when boost.")]
+	public float minBoostAngle = 5f;
 
 	[Tooltip("Maximum torque applied to the driving wheels.")]
 	public float maxTorque = 300f;
@@ -291,7 +297,6 @@ public class WheelDrive : MonoBehaviour
 				rb.constraints = RigidbodyConstraints.None;
 
 				if(airTime>minAirTime)
-					//landedEvent.Invoke();
 					vibrations.landed = true;
 
 				//Reset airTime
@@ -302,7 +307,7 @@ public class WheelDrive : MonoBehaviour
 			{
 				// Keep car direction while in air 
 				rb.constraints = RigidbodyConstraints.FreezeRotationY;
-				boostGauge = 0;
+				//boostGauge = 0;
 				airTime += Time.fixedDeltaTime;
 			}
 			
@@ -317,8 +322,14 @@ public class WheelDrive : MonoBehaviour
 			// Front wheels
 			if (wheel.transform.localPosition.z >= 0)
 			{
-				//Normal Steering
-				angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
+				//Boost Steering
+				//if (boostInput||boostGauge>0)
+				//{
+					angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
+				//}
+				//else
+					//Normal Steering
+					//angle = angleInput * (((minAngle - maxAngle)/maxSpeed) * speed + maxAngle);
 
 				//Drifting
 				if (driftInput)

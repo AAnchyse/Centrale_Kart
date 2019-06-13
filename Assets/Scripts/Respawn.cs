@@ -5,17 +5,20 @@ using UnityEngine;
 public class Respawn : MonoBehaviour
 {
     public Transform vehicle;
-    public Transform spawn;
+    private Transform spawn;
 
     public float height;
 
     private RaycastHit hit;
     private int layerMask = 1 << 8;
 
+    public Checkpoint checkpoint;
+
     void Update()
     {
         if (vehicle.position.y<height || Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out hit, 3, layerMask))
         {
+            spawn = checkpoint.nodes[checkpoint.currentNode];
             vehicle.SetPositionAndRotation(spawn.position,spawn.rotation);
             vehicle.GetComponent<Rigidbody>().velocity = new Vector3(0,0,0);
             vehicle.GetComponent<Rigidbody>().angularVelocity = new Vector3(0,0,0);

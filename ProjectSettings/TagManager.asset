@@ -3,7 +3,8 @@
 --- !u!78 &1
 TagManager:
   serializedVersion: 2
-  tags: []
+  tags:
+  - Circuit
   layers:
   - Default
   - TransparentFX
@@ -17,8 +18,8 @@ TagManager:
   - P1Cam
   - P2Cam
   - Wheel
-  - 
-  - 
+  - Waypoint
+  - AICam
   - 
   - 
   - 

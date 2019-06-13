@@ -45,8 +45,10 @@ public class AIWheelDrive : MonoBehaviour
 	[HideInInspector]
 	public float speed;
 
-    [Tooltip("Path the AICar must follow")]
-    public Transform path;
+    public Checkpoint checkpoint;
+
+   // [Tooltip("Path the AICar must follow")]
+    //public Transform path;
 
     public float turnSpeed =5f;
 
@@ -73,8 +75,8 @@ public class AIWheelDrive : MonoBehaviour
 	[Tooltip("Acceleration applied on wheel torque, depending of rigidbody velocity.")]
 	private float acc;
     
-    private List<Transform> nodes;
-    private int currentNode = 0;
+    //public List<Transform> nodes;
+    //public int currentNode = 0;
     private bool avoiding = false;
     private float targetSteerAngle =0;
     private float avoidMultiplier =0;
@@ -82,7 +84,7 @@ public class AIWheelDrive : MonoBehaviour
 
     void Start()
     {
-        Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
+        /* Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
         nodes = new List<Transform>();
 
         for(int i = 0; i< pathTransforms.Length; i++)
@@ -91,7 +93,7 @@ public class AIWheelDrive : MonoBehaviour
             {
                 nodes.Add(pathTransforms[i]);
             }
-        }
+        }*/
 
         rb.centerOfMass = centerOfMass;
 
@@ -151,10 +153,10 @@ public class AIWheelDrive : MonoBehaviour
 			}
 		}
 	}
-//IL VA FALLOIR MELANGER LES DEUX FIXEDUPDATE
+
     void FixedUpdate()
 	{
-        Sensors();
+        //Sensors();
 
 		// Move wheels
 		foreach (WheelCollider wheel in m_Wheels)
@@ -180,10 +182,11 @@ public class AIWheelDrive : MonoBehaviour
                 }
                 else
                 {
-                    Vector3 relativeVector = transform.InverseTransformPoint(nodes[currentNode].position);
+                    Vector3 relativeVector = transform.InverseTransformPoint(checkpoint.nodes[checkpoint.currentNode].position);
                     targetSteerAngle = (relativeVector.x /= relativeVector.magnitude) * maxAngle;
                 }
-                wheel.steerAngle = Mathf.Lerp(wheel.steerAngle, targetSteerAngle, Time.deltaTime* turnSpeed);
+                //wheel.steerAngle = Mathf.Lerp(wheel.steerAngle, targetSteerAngle, Time.deltaTime* turnSpeed);
+                wheel.steerAngle = targetSteerAngle;
 				//angle = angleInput * (((minAngle - maxAngle)/maxSpeed) * speed + maxAngle);
 				//wheel.steerAngle = angle;
 				
@@ -200,7 +203,7 @@ public class AIWheelDrive : MonoBehaviour
 		}
 	}
 
-    private void Sensors()
+    /* private void Sensors()
     {
         RaycastHit hit;
         Vector3 sensorStartPos = transform.position;
@@ -271,14 +274,14 @@ public class AIWheelDrive : MonoBehaviour
                 avoidMultiplier+=0.5f;
             } 
         }
-    }
+    }*/
 
     //New Waypoint
-    void OnTriggerEnter(Collider collider)
+    /* void OnTriggerEnter(Collider collider)
     {
         if (collider.gameObject.layer == LayerMask.NameToLayer("Waypoint"))
         {
-            print("wesh");
+            
             if(currentNode == nodes.Count -1)
             {
                 currentNode = 0;
@@ -288,5 +291,5 @@ public class AIWheelDrive : MonoBehaviour
                 currentNode ++;
             }
         }
-    }
+    }*/
 }

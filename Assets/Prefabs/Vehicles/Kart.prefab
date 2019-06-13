@@ -3985,6 +3985,7 @@ GameObject:
   - component: {fileID: 5392010051478006643}
   - component: {fileID: 5392010051478006646}
   - component: {fileID: 5392010051478006647}
+  - component: {fileID: 7393151708533530094}
   - component: {fileID: 5392010051478006632}
   - component: {fileID: 5392010051478006633}
   - component: {fileID: 1939227465}
@@ -4101,6 +4102,8 @@ MonoBehaviour:
   centerOfMass: {x: 0, y: -1.5, z: 0}
   maxAngle: 11
   minAngle: 2
+  maxBoostAngle: 30
+  minBoostAngle: 5
   maxTorque: 2000
   reverseMaxTorque: 1000
   maxBoostTorque: 3000
@@ -4175,8 +4178,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   vehicle: {fileID: 5392010051478006642}
-  spawn: {fileID: 0}
   height: -30
+  checkpoint: {fileID: 0}
 --- !u!114 &5392010051478006647
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4196,6 +4199,21 @@ MonoBehaviour:
   Right: {fileID: 5392010051504313003}
   rb: {fileID: 5392010051478006641}
   coeff: 3000
+--- !u!114 &7393151708533530094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5392010051478006654}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 277d95c3d3e8c904e8f3b1d7ca430d12, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  path: {fileID: 0}
+  nodes: []
+  currentNode: 0
 --- !u!114 &5392010051478006632
 MonoBehaviour:
   m_ObjectHideFlags: 0
