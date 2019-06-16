@@ -5,27 +5,27 @@ using UnityEngine;
 public class Respawn : MonoBehaviour
 {
     public Transform vehicle;
-    private Transform spawn;
-
+    public Checkpoint checkpoint;
+    public bool respawn = false;
     public float height;
 
+    private Transform spawn;
     private RaycastHit hit;
     private int layerMask = 1 << 8;
 
-    public Checkpoint checkpoint;
-
     void Update()
     {
-        if (vehicle.position.y<height || Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out hit, 3, layerMask))
+        if (vehicle.position.y<height || Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out hit, 3, layerMask) || respawn )
         {
-            //if(checkpoint.currentNode > 0)
+            if(checkpoint.currentNode>=0)
                 spawn = checkpoint.nodes[checkpoint.currentNode];
-            /* else
-                spawn = checkpoint.nodes[checkpoint.nodes.Count ];*/
-                
+            else
+                spawn = checkpoint.nodes[0];
+
             vehicle.SetPositionAndRotation(spawn.position,spawn.rotation);
             vehicle.GetComponent<Rigidbody>().velocity = new Vector3(0,0,0);
             vehicle.GetComponent<Rigidbody>().angularVelocity = new Vector3(0,0,0);
+            respawn = false;
         }     
     }
 }

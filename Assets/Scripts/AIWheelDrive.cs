@@ -274,21 +274,4 @@ public class AIWheelDrive : MonoBehaviour
             } 
         }
     }*/
-
-    //New Waypoint
-    /* void OnTriggerEnter(Collider collider)
-    {
-        if (collider.gameObject.layer == LayerMask.NameToLayer("Waypoint"))
-        {
-            
-            if(currentNode == nodes.Count -1)
-            {
-                currentNode = 0;
-            }
-            else
-            {
-                currentNode ++;
-            }
-        }
-    }*/
 }

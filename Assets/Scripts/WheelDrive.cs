@@ -16,43 +16,43 @@ public class WheelDrive : MonoBehaviour
 	public Vector3 centerOfMass;	
 
     [Tooltip("Maximum steering angle of the wheels.")]
-	public float maxAngle = 30f;
+	public float maxAngle;
 
 	[Tooltip("Minimum steering angle of the wheels.")]
-	public float minAngle = 5f;
+	public float minAngle;
 
 	[Tooltip("Maximum steering angle of the wheels when boost .")]
-	public float maxBoostAngle = 30f;
+	public float maxBoostAngle;
 
 	[Tooltip("Minimum steering angle of the wheels when boost.")]
-	public float minBoostAngle = 5f;
+	public float minBoostAngle;
 
 	[Tooltip("Maximum torque applied to the driving wheels.")]
-	public float maxTorque = 300f;
+	public float maxTorque;
 
 	[Tooltip("Maximum torque applied to the driving wheels when reverse drive.")]
-	public float reverseMaxTorque = 300f;
+	public float reverseMaxTorque;
 
 	[Tooltip("Maximum torque applied to the driving wheels.")]
-	public float maxBoostTorque = 300f;
+	public float maxBoostTorque;
 
 	[Tooltip("Maximum vehicle's speed (in m/s).")]
-	public float maxSpeed =50;
+	public float maxSpeed;
 	
-	[Tooltip("Maximum vehicle's speed (in m/s).")]
-	public float maxBoostSpeed =40;
+	[Tooltip("Maximum vehicle's boost speed (in m/s).")]
+	public float maxBoostSpeed;
 
 	[Tooltip("If you need the visual wheels to be attached automatically, drag the wheel shape here.")]
 	public GameObject wheelMesh;
 
 	[Tooltip("The vehicle's speed when the physics engine can use different amount of sub-steps (in m/s).")]
-	public float criticalSpeed = 5f;
+	public float criticalSpeed;
 
 	[Tooltip("Simulation sub-steps when the speed is above critical.")]
-	public int stepsBelow = 5;
+	public int stepsBelow;
 
 	[Tooltip("Simulation sub-steps when the speed is below critical.")]
-	public int stepsAbove = 1;
+	public int stepsAbove;
 
 	[Tooltip("Threshold at which the boostGauge begins to fill")]
 	public float slidingThreshold;
@@ -127,7 +127,6 @@ public class WheelDrive : MonoBehaviour
 
 	[Tooltip("Number of wheels grounded")]
 	private int wheelsGrounded;
-
 	private int previouswheelsGrounded;
 
 	[Tooltip("List of player's inputs")]
@@ -158,11 +157,8 @@ public class WheelDrive : MonoBehaviour
 		}
 
 		isDrifting = false;
-
 		isBracking = false;
-
 		airTime =0;
-
 		wheelsGrounded =0;
 		previouswheelsGrounded =0;
 	}
@@ -298,9 +294,9 @@ public class WheelDrive : MonoBehaviour
 		{
 			isGrounded = false;
 			boostGauge = 0;
-			//airTime += Time.fixedDeltaTime;
 		}
 
+		//Send vibration when a new wheel hits the ground
 		if(wheelsGrounded > previouswheelsGrounded)
 		{
 			if(airTime>minAirTime)
@@ -310,9 +306,9 @@ public class WheelDrive : MonoBehaviour
 			airTime = 0;
 		}
 	}
+
 	void FixedUpdate()
 	{
-
 		if (wheelsGrounded<4 && wheelsGrounded>=0)
 		{
 			// Keep car direction while in air 
@@ -320,17 +316,10 @@ public class WheelDrive : MonoBehaviour
 			airTime += Time.fixedDeltaTime;	
 		}
 
+		// Remove constraints
 		if (wheelsGrounded==4)
-		{
-			// Remove constraints
 			rb.constraints = RigidbodyConstraints.None;
-/*
-			if(airTime>minAirTime)
-				vibrations.landed = true;
 
-			//Reset airTime
-			airTime = 0;*/
-		}
 
 		// Move wheels
 		foreach (WheelCollider wheel in m_Wheels)

@@ -6,8 +6,15 @@ public class Checkpoint : MonoBehaviour
 {
     public Transform path;
     public List<Transform> nodes;
-    public int currentNode = 0;
+    public int currentNode = -1;
     public int targetNode = 0; 
+
+    public Respawn respawn;
+    public bool show=false;
+    public int position = 0;
+    public static bool updatePosition= false;
+    public int round = 1;
+    public float targetNodeDistance = 0; // A REGLER PLUS TARD
 
     void Start()
     {
@@ -22,21 +29,38 @@ public class Checkpoint : MonoBehaviour
             }
         }
     }
-
     //New Waypoint
     void OnTriggerEnter(Collider collider)
     {
+        updatePosition = true;
         if (collider.gameObject.layer == LayerMask.NameToLayer("Waypoint"))
         {
-            currentNode = collider.GetComponent<NodeID>().nodeID;
+            int colliderNode = collider.GetComponent<NodeID>().nodeID; //currentNode
+            //debug
+            if(show)
+            print(position);
 
-            if(currentNode == nodes.Count -1)
+            //we check if we haven't missed a checkpoint, otherwise we respawn at currentNode
+            if(colliderNode == targetNode)
             {
-                targetNode = 0;
+                if(colliderNode ==0 && currentNode == nodes.Count - 1)
+                    round++;
+
+                currentNode = colliderNode;
+
+                //we create a new target
+                if(currentNode == nodes.Count - 1)
+                {
+                    targetNode = 0;
+                }
+                else
+                {
+                    targetNode = currentNode + 1;
+                }
             }
             else
             {
-                targetNode = currentNode + 1;
+                respawn.respawn = true;
             }
         }
     }
