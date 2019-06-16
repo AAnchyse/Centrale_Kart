@@ -75,8 +75,7 @@ public class AIWheelDrive : MonoBehaviour
 	[Tooltip("Acceleration applied on wheel torque, depending of rigidbody velocity.")]
 	private float acc;
     
-    //public List<Transform> nodes;
-    //public int currentNode = 0;
+
     private bool avoiding = false;
     private float targetSteerAngle =0;
     private float avoidMultiplier =0;
@@ -182,7 +181,7 @@ public class AIWheelDrive : MonoBehaviour
                 }
                 else
                 {
-                    Vector3 relativeVector = transform.InverseTransformPoint(checkpoint.nodes[checkpoint.currentNode].position);
+                    Vector3 relativeVector = transform.InverseTransformPoint(checkpoint.nodes[checkpoint.targetNode].position);
                     targetSteerAngle = (relativeVector.x /= relativeVector.magnitude) * maxAngle;
                 }
                 //wheel.steerAngle = Mathf.Lerp(wheel.steerAngle, targetSteerAngle, Time.deltaTime* turnSpeed);

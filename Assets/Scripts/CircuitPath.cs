@@ -8,10 +8,8 @@ public class CircuitPath : MonoBehaviour
 
     private List<Transform> nodes = new List<Transform>();
     
-    void OnDrawGizmos()
+    void Start() 
     {
-        Gizmos.color = lineColor;
-
         Transform[] pathTransforms = GetComponentsInChildren<Transform>();
         nodes = new List<Transform>();
 
@@ -19,9 +17,15 @@ public class CircuitPath : MonoBehaviour
         {
             if(pathTransforms[i] != transform)
             {
+                pathTransforms[i].GetComponent<NodeID>().nodeID = i-1;
                 nodes.Add(pathTransforms[i]);
             }
         }
+    }
+
+    void OnDrawGizmos()
+    {
+        Gizmos.color = lineColor;
 
         for(int i =0; i < nodes.Count; i++)
         {

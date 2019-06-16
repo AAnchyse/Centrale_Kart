@@ -18,7 +18,11 @@ public class Respawn : MonoBehaviour
     {
         if (vehicle.position.y<height || Physics.Raycast(transform.position, transform.TransformDirection(Vector3.up), out hit, 3, layerMask))
         {
-            spawn = checkpoint.nodes[checkpoint.currentNode];
+            //if(checkpoint.currentNode > 0)
+                spawn = checkpoint.nodes[checkpoint.currentNode];
+            /* else
+                spawn = checkpoint.nodes[checkpoint.nodes.Count ];*/
+                
             vehicle.SetPositionAndRotation(spawn.position,spawn.rotation);
             vehicle.GetComponent<Rigidbody>().velocity = new Vector3(0,0,0);
             vehicle.GetComponent<Rigidbody>().angularVelocity = new Vector3(0,0,0);

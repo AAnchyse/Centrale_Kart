@@ -7,8 +7,8 @@ public class Checkpoint : MonoBehaviour
     public Transform path;
     public List<Transform> nodes;
     public int currentNode = 0;
+    public int targetNode = 0; 
 
-    // Start is called before the first frame update
     void Start()
     {
         Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
@@ -28,13 +28,15 @@ public class Checkpoint : MonoBehaviour
     {
         if (collider.gameObject.layer == LayerMask.NameToLayer("Waypoint"))
         {
+            currentNode = collider.GetComponent<NodeID>().nodeID;
+
             if(currentNode == nodes.Count -1)
             {
-                currentNode = 0;
+                targetNode = 0;
             }
             else
             {
-                currentNode ++;
+                targetNode = currentNode + 1;
             }
         }
     }

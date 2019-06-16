@@ -125,6 +125,11 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Time spent when not grounded. Used for haptic feedback at landing")]
 	private float airTime;
 
+	[Tooltip("Number of wheels grounded")]
+	private int wheelsGrounded;
+
+	private int previouswheelsGrounded;
+
 	[Tooltip("List of player's inputs")]
 	private float angleInput;
 	private bool accInput;
@@ -157,6 +162,9 @@ public class WheelDrive : MonoBehaviour
 		isBracking = false;
 
 		airTime =0;
+
+		wheelsGrounded =0;
+		previouswheelsGrounded =0;
 	}
 
 	void ChangeFriction(WheelCollider wheel , float stiffnessForward , float stiffnessSideways)
@@ -265,12 +273,12 @@ public class WheelDrive : MonoBehaviour
 
 		// Check if all wheels are grounded
 		isGrounded = true;
+		previouswheelsGrounded = wheelsGrounded;
+		wheelsGrounded = 4;
 		foreach (WheelCollider wheel in m_Wheels)
 		{
 			if (!wheel.GetGroundHit(out WheelHit hit))
-			{
-				isGrounded = false;
-			}
+				wheelsGrounded --;
 
 			// Update visual wheels 
 			if (wheelMesh) 
@@ -284,33 +292,49 @@ public class WheelDrive : MonoBehaviour
 				shapeTransform.position = p;
 				shapeTransform.rotation = q;
 			}
+		}	
+
+		if (wheelsGrounded == 0)
+		{
+			isGrounded = false;
+			boostGauge = 0;
+			//airTime += Time.fixedDeltaTime;
+		}
+
+		if(wheelsGrounded > previouswheelsGrounded)
+		{
+			if(airTime>minAirTime)
+				vibrations.landed = true;
+
+			//Reset airTime
+			airTime = 0;
 		}
 	}
 	void FixedUpdate()
 	{
+
+		if (wheelsGrounded<4 && wheelsGrounded>=0)
+		{
+			// Keep car direction while in air 
+			rb.constraints = RigidbodyConstraints.FreezeRotationY;
+			airTime += Time.fixedDeltaTime;	
+		}
+
+		if (wheelsGrounded==4)
+		{
+			// Remove constraints
+			rb.constraints = RigidbodyConstraints.None;
+/*
+			if(airTime>minAirTime)
+				vibrations.landed = true;
+
+			//Reset airTime
+			airTime = 0;*/
+		}
+
 		// Move wheels
 		foreach (WheelCollider wheel in m_Wheels)
-		{
-			if (isGrounded)
-			{
-				// Remove constraints
-				rb.constraints = RigidbodyConstraints.None;
-
-				if(airTime>minAirTime)
-					vibrations.landed = true;
-
-				//Reset airTime
-				airTime = 0;
-
-			}
-			else
-			{
-				// Keep car direction while in air 
-				rb.constraints = RigidbodyConstraints.FreezeRotationY;
-				//boostGauge = 0;
-				airTime += Time.fixedDeltaTime;
-			}
-			
+		{	
 			// Fill the boost gauge
 			wheel.GetGroundHit(out WheelHit hit);
 			if(isDrifting && Mathf.Abs(hit.sidewaysSlip)>slidingThreshold)
@@ -322,14 +346,7 @@ public class WheelDrive : MonoBehaviour
 			// Front wheels
 			if (wheel.transform.localPosition.z >= 0)
 			{
-				//Boost Steering
-				//if (boostInput||boostGauge>0)
-				//{
-					angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
-				//}
-				//else
-					//Normal Steering
-					//angle = angleInput * (((minAngle - maxAngle)/maxSpeed) * speed + maxAngle);
+				angle = angleInput * (((minAngle - maxAngle)/maxBoostSpeed) * speed + maxAngle);
 
 				//Drifting
 				if (driftInput)

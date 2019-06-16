@@ -26,15 +26,7 @@ public class Vibrations : MonoBehaviour
         vibration = new GamepadVibration();
         landed = false;
         delay = 0;
-
-        //wheelDrive.landedEvent.AddListener(Landed);
     }
-
-   /* void Landed()
-    {
-        landed = true;
-        print("coucou");
-    }*/
 
     void Update()
     {
