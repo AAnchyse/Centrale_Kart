@@ -13,10 +13,14 @@ public class Vibrations : MonoBehaviour
 	public GamepadVibration vibration;
     public Rigidbody rb;
     public float landingForce;
+    public float collisionForce;
     public float delayMax;
 
     [HideInInspector]
     public bool landed;
+
+    [HideInInspector]
+    public bool collision;
 
     private float delay;
 
@@ -25,6 +29,7 @@ public class Vibrations : MonoBehaviour
     {
         vibration = new GamepadVibration();
         landed = false;
+        collision = false;
         delay = 0;
     }
 
@@ -50,6 +55,20 @@ public class Vibrations : MonoBehaviour
                 delay =0;
             }
         }
+
+        else if(collision)
+        {
+            vibration.LeftMotor = collisionForce;
+		    vibration.RightMotor = vibration.LeftMotor;
+            if( delay< delayMax)
+                delay+= Time.deltaTime;
+            else
+            {
+                collision = false;
+                delay =0;
+            }
+        }
+        
         else
         {
             vibration.LeftMotor = 0;

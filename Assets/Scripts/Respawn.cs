@@ -6,7 +6,10 @@ public class Respawn : MonoBehaviour
 {
     public Transform vehicle;
     public Checkpoint checkpoint;
+
+    [HideInInspector]
     public bool respawn = false;
+    
     public float height;
 
     private Transform spawn;

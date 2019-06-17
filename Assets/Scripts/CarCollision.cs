@@ -6,6 +6,9 @@ public class CarCollision : MonoBehaviour
 {
     public Rigidbody rb;
     private Vector3 angularVelocityNull;
+
+    public Vibrations vibrations;
+    public bool isAI;
  
     void Start()
     {
@@ -15,6 +18,8 @@ public class CarCollision : MonoBehaviour
     void OnCollisionEnter(Collision collision)
     {
         rb.angularVelocity = angularVelocityNull;
+        if(!isAI)
+            vibrations.collision = true;
     }
     
     void OnCollisionStay(Collision collision)

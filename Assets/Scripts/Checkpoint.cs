@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using TMPro;
 
 public class Checkpoint : MonoBehaviour
 {
@@ -8,13 +9,22 @@ public class Checkpoint : MonoBehaviour
     public List<Transform> nodes;
     public int currentNode = -1;
     public int targetNode = 0; 
-
+    public bool finish = true;
     public Respawn respawn;
-    public bool show=false;
     public int position = 0;
+
+    public TextMeshProUGUI roundText;
+    public TextMeshProUGUI positionText;
+
+    [HideInInspector]
     public static bool updatePosition= false;
+    public static bool computeTargetDistance = false;
+
     public int round = 1;
-    public float targetNodeDistance = 0; // A REGLER PLUS TARD
+    
+    public int counterDelay;
+    private int counter = 0;
+    public float targetNodeDistance = 0;
 
     void Start()
     {
@@ -28,26 +38,46 @@ public class Checkpoint : MonoBehaviour
                 nodes.Add(pathTransforms[i]);
             }
         }
+        roundText.text = round.ToString()+" / "+ PositioningSystem.roundNumber.ToString();
+    }
+    void Update() 
+    {
+        if(counter >counterDelay)
+        {
+            computeTargetDistance = true;
+            counter = 0;
+        }
+        if(computeTargetDistance)
+        {
+            Vector3 relativeVector = transform.InverseTransformPoint(nodes[targetNode].position);
+            targetNodeDistance = relativeVector.sqrMagnitude;
+            positionText.text = position.ToString()+" / "+ PositioningSystem.carsNumber.ToString();
+        }
+        counter++;
     }
     //New Waypoint
     void OnTriggerEnter(Collider collider)
     {
-        updatePosition = true;
         if (collider.gameObject.layer == LayerMask.NameToLayer("Waypoint"))
         {
-            int colliderNode = collider.GetComponent<NodeID>().nodeID; //currentNode
-            //debug
-            if(show)
-            print(position);
+            int colliderNode = collider.GetComponent<NodeID>().nodeID;
 
             //we check if we haven't missed a checkpoint, otherwise we respawn at currentNode
             if(colliderNode == targetNode)
             {
                 if(colliderNode ==0 && currentNode == nodes.Count - 1)
+                {
                     round++;
 
+                    if(round > PositioningSystem.roundNumber)
+                        roundText.text = "Finish ! ";
+                    else
+                    roundText.text = round.ToString()+" / "+ PositioningSystem.roundNumber.ToString();
+                }
+                
                 currentNode = colliderNode;
-
+                updatePosition = true;
+                
                 //we create a new target
                 if(currentNode == nodes.Count - 1)
                 {

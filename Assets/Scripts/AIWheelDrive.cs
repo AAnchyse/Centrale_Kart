@@ -47,9 +47,6 @@ public class AIWheelDrive : MonoBehaviour
 
     public Checkpoint checkpoint;
 
-   // [Tooltip("Path the AICar must follow")]
-    //public Transform path;
-
     public float turnSpeed =5f;
 
     [Header("Sensor")]
@@ -83,17 +80,6 @@ public class AIWheelDrive : MonoBehaviour
 
     void Start()
     {
-        /* Transform[] pathTransforms = path.GetComponentsInChildren<Transform>();
-        nodes = new List<Transform>();
-
-        for(int i = 0; i< pathTransforms.Length; i++)
-        {
-            if(pathTransforms[i] != path.transform)
-            {
-                nodes.Add(pathTransforms[i]);
-            }
-        }*/
-
         rb.centerOfMass = centerOfMass;
 
 		m_Wheels = GetComponentsInChildren<WheelCollider>();
@@ -151,29 +137,33 @@ public class AIWheelDrive : MonoBehaviour
 				shapeTransform.rotation = q;
 			}
 		}
+        if(checkpoint.finish)
+        {
+            torque = 0;
+			handBrake = Mathf.Infinity;
+        }
 	}
 
     void FixedUpdate()
 	{
         //Sensors();
-
-		// Move wheels
-		foreach (WheelCollider wheel in m_Wheels)
-		{
-			if (isGrounded)
-			{
-				// Remove constraints
-				rb.constraints = RigidbodyConstraints.None;
-			}
-			else
-			{
-				// Keep car direction while in air 
-				rb.constraints = RigidbodyConstraints.FreezeRotationY;
-			}
-			
-			// Front wheels
-			if (wheel.transform.localPosition.z >= 0)
-			{
+        // Move wheels
+        foreach (WheelCollider wheel in m_Wheels)
+        {
+            if (isGrounded)
+            {
+                // Remove constraints
+                rb.constraints = RigidbodyConstraints.None;
+            }
+            else
+            {
+                // Keep car direction while in air 
+                rb.constraints = RigidbodyConstraints.FreezeRotationY;
+            }
+            
+            // Front wheels
+            if (wheel.transform.localPosition.z >= 0)
+            {
                 //Steering angle
                 if (avoiding)
                 {
@@ -184,22 +174,23 @@ public class AIWheelDrive : MonoBehaviour
                     Vector3 relativeVector = transform.InverseTransformPoint(checkpoint.nodes[checkpoint.targetNode].position);
                     targetSteerAngle = (relativeVector.x /= relativeVector.magnitude) * maxAngle;
                 }
-                //wheel.steerAngle = Mathf.Lerp(wheel.steerAngle, targetSteerAngle, Time.deltaTime* turnSpeed);
-                wheel.steerAngle = targetSteerAngle;
-				//angle = angleInput * (((minAngle - maxAngle)/maxSpeed) * speed + maxAngle);
-				//wheel.steerAngle = angle;
-				
-				//Torque
-				wheel.motorTorque = torque;
-			}
+                wheel.steerAngle = Mathf.Lerp(wheel.steerAngle, targetSteerAngle, Time.deltaTime* turnSpeed);
+                //wheel.steerAngle = targetSteerAngle;
+                //angle = angleInput * (((minAngle - maxAngle)/maxSpeed) * speed + maxAngle);
+                //wheel.steerAngle = angle;
+                
+                //Torque
+                wheel.motorTorque = torque;
+            }
 
-			//Rear wheels
-			if (wheel.transform.localPosition.z < 0)
-			{
-				//Torque
-				wheel.motorTorque = torque;
-			}
-		}
+            //Rear wheels
+            if (wheel.transform.localPosition.z < 0)
+            {
+                //Torque
+                wheel.motorTorque = torque;
+                wheel.brakeTorque = handBrake;
+            }
+        }
 	}
 
     /* private void Sensors()

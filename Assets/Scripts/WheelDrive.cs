@@ -63,6 +63,8 @@ public class WheelDrive : MonoBehaviour
 	[Tooltip("Minimum time while not grounded to get haptic feedback")]
 	public float minAirTime = 1;
 
+	public Checkpoint checkpoint;
+
 	[Tooltip("Indicates if the 4 car's wheels are grounded.")]
 	[HideInInspector]
 	public bool isGrounded;
@@ -83,6 +85,7 @@ public class WheelDrive : MonoBehaviour
 	[HideInInspector]
 	public float boostGauge;
 
+	[Tooltip("Used to send vibration when landing.")]
 	public Vibrations vibrations;
 
 	[Tooltip("Friction curves used to change the stiffness of the wheels.")]
@@ -305,6 +308,12 @@ public class WheelDrive : MonoBehaviour
 			//Reset airTime
 			airTime = 0;
 		}
+
+		if(checkpoint.finish)
+        {
+            torque = 0;
+			handBrake = Mathf.Infinity;
+        }
 	}
 
 	void FixedUpdate()
